@@ -1,0 +1,40 @@
+# ---------- Java / Maven ----------
+target/
+*.class
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------- Node / Vue ----------
+node_modules/
+dist/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- IDE ----------
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# ---------- 本地配置与密钥（绝对不要提交）----------
+.env
+.env.*
+**/application-local.properties
+**/application-prod.properties
+**/application-secret.properties
+*.pem
+*.key
+*.p12
+
+# ---------- 日志 / 临时文件 ----------
+*.log
+logs/
+tmp/
+
+# ---------- 操作系统 ----------
+Thumbs.db
+Desktop.ini
+.DS_Store
