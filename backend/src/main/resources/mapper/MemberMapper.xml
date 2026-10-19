@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.familyhealth.mapper.MemberMapper">
+
+    <select id="members" resultType = "Member">
+        select * from member
+    </select>
+
+    <insert id="saveMember" parameterType="Member">
+        insert into member(account, password, name, gender, phone, birthday, bloodType, illnessHistory, allergy)
+        values(#{account}, #{password}, #{name}, #{gender}, #{phone}, #{birthday}, #{bloodType}, #{illnessHistory}, #{allergy})
+    </insert>
+    <delete id="deleteById">
+        delete from member where id = #{id}
+    </delete>
+    <select id="getById" resultType="Member">
+        select * from member where id = #{id}
+    </select>
+
+    <!-- 更新编辑 -->
+    <update id="updateMember" parameterType="Member">
+        update member
+        set account=#{account},
+        name=#{name},
+        gender=#{gender},
+        phone=#{phone},
+        birthday=#{birthday},
+        bloodType=#{bloodType},
+        illnessHistory=#{illnessHistory},
+        allergy=#{allergy}
+        where id = #{id}
+    </update>
+
+
+</mapper>
