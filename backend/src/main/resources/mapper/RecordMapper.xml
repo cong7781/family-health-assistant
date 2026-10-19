@@ -4,16 +4,24 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.familyhealth.mapper.RecordMapper">
-    <!-- 查询当前登录用户所有健康记录 -->
+
+    <!-- 分页查询当前登录用户的健康记录 -->
     <select id="recordList" resultType="Record">
-        select hr.*, m.name memberName
+        select hr.*, m.name as memberName
         from record hr
         left join member m on hr.memberid = m.id
         where hr.memberid = #{loginMemberId}
-        order by hr.createTime desc
+        order by hr.createTime desc, hr.id desc
+        limit #{offset}, #{size}
     </select>
 
-    <!-- 根据id查询单条 -->
+    <select id="countRecords" resultType="long">
+        select count(*)
+        from record
+        where memberid = #{loginMemberId}
+    </select>
+
+    <!-- 根据 id 查询单条（带归属校验，防止越权看到别人的记录） -->
     <select id="recordGetById" resultType="Record">
         select * from record
         where id = #{id} and memberid = #{loginMemberId}
@@ -21,21 +29,21 @@
 
     <!-- 新增健康记录 -->
     <insert id="recordSaveRecord" parameterType="Record">
-        insert into record(temperature,bpHigh,bpLow,bloodOxygen,weight,bloodSugar,remark,memberid,createTime)
-        values(#{temperature},#{bpHigh},#{bpLow},#{bloodOxygen},#{weight},#{bloodSugar},#{remark},#{memberid},now())
+        insert into record(temperature, bpHigh, bpLow, bloodOxygen, weight, bloodSugar, remark, memberid, createTime)
+        values(#{temperature}, #{bpHigh}, #{bpLow}, #{bloodOxygen}, #{weight}, #{bloodSugar}, #{remark}, #{memberid}, now())
     </insert>
 
     <!-- 更新记录 -->
     <update id="recordUpdateRecord">
         update record set
-        temperature=#{r.temperature},
-        bpHigh=#{r.bpHigh},
-        bpLow=#{r.bpLow},
-        bloodOxygen=#{r.bloodOxygen},
-        weight=#{r.weight},
-        bloodSugar=#{r.bloodSugar},
-        remark=#{r.remark},
-        memberid=#{r.memberid}
+            temperature = #{r.temperature},
+            bpHigh = #{r.bpHigh},
+            bpLow = #{r.bpLow},
+            bloodOxygen = #{r.bloodOxygen},
+            weight = #{r.weight},
+            bloodSugar = #{r.bloodSugar},
+            remark = #{r.remark},
+            memberid = #{r.memberid}
         where id = #{r.id} and memberid = #{loginMemberId}
     </update>
 
@@ -44,4 +52,5 @@
         delete from record
         where id = #{id} and memberid = #{loginMemberId}
     </delete>
+
 </mapper>

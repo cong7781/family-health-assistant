@@ -1,55 +1,76 @@
 package com.example.familyhealth.web;
 
+import com.example.familyhealth.commom.PageResult;
 import com.example.familyhealth.model.Record;
 import com.example.familyhealth.service.RecordService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.*;
-import jakarta.annotation.Resource;
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/health")
 public class RecordWeb {
-    @Resource
-    private RecordService recordService;
 
-    // 前端GET /health/all 查询全部记录
-    @GetMapping("/all")
-    public List<Record> listAll(HttpServletRequest request){
-        Integer loginMemberId = (Integer) request.getAttribute("loginMemberId");
-        return recordService.recordList(loginMemberId);
+    private final RecordService recordService;
+
+    public RecordWeb(RecordService recordService) {
+        this.recordService = recordService;
     }
 
-    // 前端POST /health/save 新增记录
+    /**
+     * 当前登录用户的健康记录（分页）。
+     * GET /health/all?page=1&size=10
+     */
+    @GetMapping("/all")
+    public PageResult<Record> listAll(@RequestParam(defaultValue = "1") Integer page,
+                                      @RequestParam(defaultValue = "10") Integer size,
+                                      HttpServletRequest request) {
+        Integer loginMemberId = (Integer) request.getAttribute("loginMemberId");
+        return recordService.recordList(loginMemberId, page, size);
+    }
+
     @PostMapping("/save")
-    public String save(@RequestBody Record record, HttpServletRequest request){
+    public Map<String, Object> save(@RequestBody Record record, HttpServletRequest request) {
         Integer loginMemberId = (Integer) request.getAttribute("loginMemberId");
         record.setMemberid(loginMemberId);
         recordService.recordSaveRecord(record);
-        return "success";
+        return ok("success");
     }
 
-    // 前端GET /health/{id} 单条查询
     @GetMapping("/{id}")
-    public Record getById(@PathVariable Integer id, HttpServletRequest request){
+    public Record getById(@PathVariable Integer id, HttpServletRequest request) {
         Integer loginMemberId = (Integer) request.getAttribute("loginMemberId");
         return recordService.recordGetById(id, loginMemberId);
     }
 
-    // 前端POST /health/update 修改记录
     @PostMapping("/update")
-    public String update(@RequestBody Record record, HttpServletRequest request){
+    public Map<String, Object> update(@RequestBody Record record, HttpServletRequest request) {
         Integer loginMemberId = (Integer) request.getAttribute("loginMemberId");
         record.setMemberid(loginMemberId);
         recordService.recordUpdateRecord(record, loginMemberId);
-        return "success";
+        return ok("success");
     }
 
-    // 前端DELETE /health/{id} 删除记录
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Integer id, HttpServletRequest request){
+    public Map<String, Object> delete(@PathVariable Integer id, HttpServletRequest request) {
         Integer loginMemberId = (Integer) request.getAttribute("loginMemberId");
         recordService.recordDeleteById(id, loginMemberId);
-        return "success";
+        return ok("success");
+    }
+
+    private Map<String, Object> ok(String message) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("message", message);
+        return result;
     }
 }

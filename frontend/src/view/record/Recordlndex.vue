@@ -5,7 +5,7 @@
       <div slot="header" class="card-header-custom">
         <div class="header-title-wrap">
           <span class="header-title">健康监测记录管理</span>
-          <span class="header-count" v-if="healthList.length">共 {{ healthList.length }} 条记录</span>
+          <span class="header-count" v-if="total">共 {{ total }} 条记录</span>
         </div>
         <el-button
           type="primary"
@@ -73,6 +73,20 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-wrap">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :current-page="page"
+          :page-size="size"
+          :page-sizes="[5, 10, 20, 50]"
+          :total="total"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        ></el-pagination>
+      </div>
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
@@ -86,7 +100,10 @@ export default {
   components: { HealthAdd },
   data() {
     return {
-      healthList: []
+      healthList: [],
+      page: 1,
+      size: 10,
+      total: 0
     }
   },
   methods: {
@@ -101,6 +118,10 @@ export default {
             .delete('/health/' + row.id)
             .then(() => {
               this.$message.success('删除成功！')
+              // 删掉当前页最后一条时回退一页，避免停留在空白页
+              if (this.healthList.length === 1 && this.page > 1) {
+                this.page -= 1
+              }
               this.loadList()
             })
             .catch(() => {
@@ -112,9 +133,25 @@ export default {
         })
     },
     loadList() {
-      this.$http.get('/health/all').then(res => {
-        this.healthList = res.data
-      })
+      this.$http
+        .get('/health/all', { params: { page: this.page, size: this.size } })
+        .then(res => {
+          const data = res.data || {}
+          this.healthList = data.records || []
+          this.total = data.total || 0
+        })
+        .catch(() => {
+          this.$message.error('健康记录加载失败，请稍后重试')
+        })
+    },
+    handlePageChange(page) {
+      this.page = page
+      this.loadList()
+    },
+    handleSizeChange(size) {
+      this.size = size
+      this.page = 1
+      this.loadList()
     },
     opendialog() {
       this.$refs.healthAdd.resetForm()
@@ -220,5 +257,12 @@ export default {
 .record-card >>> .el-button--text:hover {
   background: #f0f4f8;
   border-radius: 4px;
+}
+
+/* 分页 */
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

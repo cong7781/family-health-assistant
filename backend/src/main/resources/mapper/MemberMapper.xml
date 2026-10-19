@@ -5,34 +5,54 @@
 
 <mapper namespace="com.example.familyhealth.mapper.MemberMapper">
 
-    <select id="members" resultType = "Member">
-        select * from member
+    <!--
+      不再使用 select *：显式列出字段，避免把 password 哈希带到列表接口里。
+      列名用驼峰，与建表脚本 docs/schema.sql 保持一致。
+    -->
+    <select id="members" resultType="Member">
+        select id, account, name, gender, phone, birthday,
+               bloodType, illnessHistory, allergy, createTime
+        from member
+        order by id
+        limit #{offset}, #{size}
+    </select>
+
+    <select id="countMembers" resultType="long">
+        select count(*) from member
     </select>
 
     <insert id="saveMember" parameterType="Member">
         insert into member(account, password, name, gender, phone, birthday, bloodType, illnessHistory, allergy)
         values(#{account}, #{password}, #{name}, #{gender}, #{phone}, #{birthday}, #{bloodType}, #{illnessHistory}, #{allergy})
     </insert>
+
     <delete id="deleteById">
         delete from member where id = #{id}
     </delete>
+
     <select id="getById" resultType="Member">
-        select * from member where id = #{id}
+        select id, account, name, gender, phone, birthday,
+               bloodType, illnessHistory, allergy, createTime
+        from member
+        where id = #{id}
     </select>
 
-    <!-- 更新编辑 -->
+    <!-- 更新资料时不碰密码：密码只能通过 updatePassword 单独修改 -->
     <update id="updateMember" parameterType="Member">
         update member
-        set account=#{account},
-        name=#{name},
-        gender=#{gender},
-        phone=#{phone},
-        birthday=#{birthday},
-        bloodType=#{bloodType},
-        illnessHistory=#{illnessHistory},
-        allergy=#{allergy}
+        set account = #{account},
+            name = #{name},
+            gender = #{gender},
+            phone = #{phone},
+            birthday = #{birthday},
+            bloodType = #{bloodType},
+            illnessHistory = #{illnessHistory},
+            allergy = #{allergy}
         where id = #{id}
     </update>
 
+    <update id="updatePassword">
+        update member set password = #{password} where id = #{id}
+    </update>
 
 </mapper>

@@ -5,7 +5,7 @@
       <div slot="header" class="card-header-custom">
         <div class="header-title-wrap">
           <span class="header-title">家庭成员信息列表</span>
-          <span class="header-count" v-if="members.length">共 {{ members.length }} 人</span>
+          <span class="header-count" v-if="total">共 {{ total }} 人</span>
         </div>
         <el-button
           type="primary"
@@ -27,7 +27,6 @@
       >
         <el-table-column prop="account" label="账号" min-width="100"></el-table-column>
         <el-table-column prop="name" label="姓名" min-width="80"></el-table-column>
-        <el-table-column prop="password" label="密码" min-width="100"></el-table-column>
         <el-table-column prop="gender" label="性别" width="70">
           <template slot-scope="scope">
             <el-tag
@@ -66,6 +65,20 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-wrap">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :current-page="page"
+          :page-size="size"
+          :page-sizes="[5, 10, 20, 50]"
+          :total="total"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        ></el-pagination>
+      </div>
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
@@ -79,7 +92,10 @@ export default {
   components: { Add },
   data() {
     return {
-      members: []
+      members: [],
+      page: 1,
+      size: 10,
+      total: 0
     }
   },
   methods: {
@@ -94,6 +110,10 @@ export default {
             .delete('/memberweb/members/' + row.id)
             .then(() => {
               this.$message.success('删除成功！')
+              // 删掉当前页最后一条时回退一页，避免停留在空白页
+              if (this.members.length === 1 && this.page > 1) {
+                this.page -= 1
+              }
               this.loadList()
             })
             .catch(() => {
@@ -105,9 +125,25 @@ export default {
         })
     },
     loadList() {
-      this.$http.get('/memberweb/members').then(res => {
-        this.members = res.data
-      })
+      this.$http
+        .get('/memberweb/members', { params: { page: this.page, size: this.size } })
+        .then(res => {
+          const data = res.data || {}
+          this.members = data.records || []
+          this.total = data.total || 0
+        })
+        .catch(() => {
+          this.$message.error('成员列表加载失败，请稍后重试')
+        })
+    },
+    handlePageChange(page) {
+      this.page = page
+      this.loadList()
+    },
+    handleSizeChange(size) {
+      this.size = size
+      this.page = 1
+      this.loadList()
     },
     opendialog() {
       this.$refs.add.resetForm()
@@ -198,5 +234,12 @@ export default {
 .member-card >>> .el-button--text:hover {
   background: #f0f4f8;
   border-radius: 4px;
+}
+
+/* 分页 */
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 </style>

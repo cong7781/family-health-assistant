@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 注意：原文件名是 LogintMapper.xml（拼写手误），已更正为 LoginMapper.xml -->
+<mapper namespace="com.example.familyhealth.mapper.LoginMapper">
+
+    <!--
+      只按账号查，把密码哈希带回来给 Java 层校验。
+      绝对不要在这里写成 password = #{password}，那样哈希存储后就永远登不进来。
+    -->
+    <select id="findByAccount" resultType="com.example.familyhealth.model.Member">
+        select id, account, password, name, gender, phone
+        from member
+        where account = #{account}
+        limit 1
+    </select>
+
+</mapper>

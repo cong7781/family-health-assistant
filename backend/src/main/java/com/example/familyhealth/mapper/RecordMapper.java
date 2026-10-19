@@ -2,12 +2,22 @@ package com.example.familyhealth.mapper;
 
 import com.example.familyhealth.model.Record;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 public interface RecordMapper {
-    List<Record> recordList(Integer loginMemberId);
 
-    Record recordGetById(Integer id, Integer loginMemberId);
+    /**
+     * 分页查询当前登录用户的健康记录（按记录时间倒序）。
+     */
+    List<Record> recordList(@Param("loginMemberId") Integer loginMemberId,
+                            @Param("offset") int offset,
+                            @Param("size") int size);
+
+    /** 当前登录用户的记录总数 */
+    long countRecords(@Param("loginMemberId") Integer loginMemberId);
+
+    Record recordGetById(@Param("id") Integer id, @Param("loginMemberId") Integer loginMemberId);
 
     void recordSaveRecord(Record record);
 

@@ -107,12 +107,22 @@ export default {
             })
           }
         })
-        .catch(() => {
-          this.$message({
-            message: '服务器连接失败，请检查网络',
-            type: 'error',
-            duration: 2000
-          })
+        .catch(err => {
+          // 后端现在用 HTTP 401 表示「账号或密码错误」，要和「网络断了」区分开
+          const status = err && err.response && err.response.status
+          if (status === 401) {
+            this.$message({
+              message: '账号或密码错误',
+              type: 'warning',
+              duration: 2000
+            })
+          } else {
+            this.$message({
+              message: '服务器连接失败，请检查网络',
+              type: 'error',
+              duration: 2000
+            })
+          }
         })
         .finally(() => {
           this.loading = false

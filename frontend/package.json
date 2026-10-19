@@ -1,7 +1,8 @@
 {
-  "name": "default",
-  "version": "0.1.0",
+  "name": "family-health-frontend",
+  "version": "0.2.0",
   "private": true,
+  "description": "家庭健康助手 · 前端（Vue 2 + Element UI）",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
