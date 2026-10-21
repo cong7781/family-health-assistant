@@ -14,6 +14,7 @@
 ## 目录
 
 - [功能](#功能)
+- [运行截图](#运行截图)
 - [技术栈](#技术栈)
 - [快速开始](#快速开始)
 - [环境变量](#环境变量)
@@ -35,14 +36,21 @@
 | 🤖 智慧医生 | 对接 DeepSeek（OpenAI 兼容接口），System Prompt 设定角色，多轮对话带上下文 |
 | 🔒 数据隔离 | 健康记录按当前登录用户过滤，接口层带归属校验，防止越权读到别人的数据 |
 
-> **截图**：把运行截图放到 `docs/screenshots/`，然后把下面几行换成实际图片，README 的观感会提升一个档次。
->
-> ```markdown
-> ![登录页](docs/screenshots/login.png)
-> ![成员管理](docs/screenshots/member.png)
-> ![健康档案](docs/screenshots/record.png)
-> ![智慧医生](docs/screenshots/aichat.png)
-> ```
+---
+
+## 运行截图
+
+**登录页** —— JWT 鉴权、失败返回 401 而不是 200 + null
+
+![登录页](docs/screenshots/login.jpg)
+
+**家庭成员管理** —— 分页、按性别/血型标签展示
+
+![成员管理](docs/screenshots/member.png)
+
+**智慧医生** —— 对接 DeepSeek，System Prompt 设定角色，多轮对话带上下文
+
+![智慧医生](docs/screenshots/aichat.png)
 
 ---
 
