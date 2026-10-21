@@ -75,69 +75,110 @@ MyBatis XML ──► MySQL
 
 ## 快速开始
 
-### 0. 前置条件
+### 0. 先确认这四样都装好了
 
-| 依赖 | 版本 | 说明 |
+| 依赖 | 版本 | 怎么确认 |
 | --- | --- | --- |
-| JDK | **17** | Spring Boot 3.5 要求 17 及以上 |
-| Maven | 3.6+ | 项目未附带 `mvnw`，需要本机安装 Maven |
-| MySQL | 8.0+ | 需要先执行 `docs/schema.sql` |
-| Node.js | **16.x 最稳** | 17 及以上会因 OpenSSL 3 报错，见下方说明 |
+| JDK | **17** | `java -version` 输出 `17.x` |
+| Maven | 3.6+ | `mvn -v` 有输出。**项目没附 `mvnw`，必须自己装** |
+| MySQL | 8.0+ | `mysql --version` 有输出，且服务已启动 |
+| Node.js | **16.x** | `node -v`。17 及以上见下面的警告 |
 
-> ⚠️ **Node 17 及以上的用户必看**
+> ⚠️ **Node 17 及以上必看**
 >
-> 前端用的是 vue-cli 3（webpack 4），在 Node 17+ 上会报：
+> 前端是 vue-cli 3（webpack 4），在 Node 17+ 上会报：
 >
 > ```
 > Error: error:0308010C:digital envelope routines::unsupported
 > ```
 >
-> 两个办法，任选其一：
+> 两个办法任选其一：
 >
-> - 改用 Node 16：`nvm use 16`（推荐）
-> - 或启动前放宽 OpenSSL：PowerShell 执行 `$env:NODE_OPTIONS="--openssl-legacy-provider"`，macOS/Linux 执行 `export NODE_OPTIONS=--openssl-legacy-provider`
+> - 换成 Node 16：`nvm use 16`（推荐）
+> - 或者每次启动前放宽 OpenSSL：PowerShell 执行 `$env:NODE_OPTIONS="--openssl-legacy-provider"`，macOS / Linux 执行 `export NODE_OPTIONS=--openssl-legacy-provider`
 
 ### 1. 建库建表
 
+确认终端当前目录是**项目根目录**（`ls` 或 `dir` 能看到 `docs` 文件夹），然后：
+
 ```bash
-mysql -u root -p < docs/schema.sql
+mysql -u root -p -e "source docs/schema.sql"
 ```
 
-脚本会创建 `familyhealthdb` 库和 `member`、`record` 两张表。
+> ⚠️ **别用 `mysql -u root -p < docs/schema.sql`**
+>
+> PowerShell 不支持 `<` 输入重定向；而 `Get-Content docs/schema.sql | mysql` 会把文件里的中文注释
+> 按 GBK 转码，直接报 `ERROR 1064 ... check the manual ... near '性别'`。
+> `-e "source ..."` 是让 mysql 客户端自己读文件，不经过终端编码，Windows / macOS / Linux 都稳。
+
+执行完验证一下：
+
+```bash
+mysql -u root -p -e "use familyhealthdb; show tables;"
+```
+
+应该看到 `member`、`record` 两张表。
 
 ### 2. 启动后端
 
-```bash
+```powershell
 cd backend
 
-# 数据库连接（按自己的改）
-export DB_USERNAME=root
-export DB_PASSWORD=你的密码
+# 数据库账号密码（改成你自己的）
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="你的MySQL密码"
 
 # JWT 签名密钥，至少 32 位
-export JWT_SECRET=$(openssl rand -hex 32)
+$env:JWT_SECRET="随便一串至少32位的字符"
 
-# 可选：配了才能用「智慧医生」，不配应用也能正常启动
-export AI_API_KEY=sk-你的DeepSeekKey
+# 可选：不配也能启动，只是「智慧医生」会提示未配置
+$env:AI_API_KEY="sk-你的DeepSeekKey"
 
 mvn spring-boot:run
 ```
 
-后端跑在 <http://127.0.0.1:8088>，探活接口 `GET /loginweb/test` 返回 `success` 即正常。
+macOS / Linux 把 `$env:XXX="..."` 换成 `export XXX=...` 即可。
 
-> 首次启动时如果 `member` 表是空的，会自动创建一个演示账号：**demo / 123456**（密码以哈希形式入库）。
+看到这两行就成功了：
+
+```
+Tomcat started on port 8088 (http)
+Started FamilyHealthApplication in 2.7 seconds
+```
+
+验证：浏览器打开 <http://127.0.0.1:8088/loginweb/test>，返回 `success`。
+
+> 首次启动且 `member` 表为空时，会自动创建演示账号 **demo / 123456**，密码以 PBKDF2 哈希入库。
 
 ### 3. 启动前端
 
-```bash
+**另开一个终端**（后端那个别关）：
+
+```powershell
 cd frontend
 npm install
 npm run serve
 ```
 
-打开终端提示的地址（默认 <http://localhost:8080>），用 `demo / 123456` 登录。
+看到 `Compiled successfully` 和 `App running at: http://localhost:8080/` 就成了。
 
-> 前端请求地址写死在 `frontend/src/main.js` 的 `axios.defaults.baseURL`（`http://127.0.0.1:8088/`），如果后端换了端口记得同步改。
+打开 <http://localhost:8080>，用 `demo / 123456` 登录。
+
+> 前端请求地址在 `frontend/src/main.js` 的 `axios.defaults.baseURL`（`http://127.0.0.1:8088/`），
+> 后端换端口时记得同步改。
+
+### 4. 跑不通？对照这张表
+
+| 现象 | 原因 | 解决 |
+| --- | --- | --- |
+| `ERROR 1064 ... near '性别'` | SQL 文件被终端按 GBK 转码了 | 改用 `-e "source docs/schema.sql"`，别用管道 |
+| `Unknown database 'familyhealthdb'` | 没建库 | 回到第 1 步 |
+| `CannotGetJdbcConnectionException` | 库名或密码不对 | 检查 `DB_PASSWORD` / `DB_URL` |
+| `Access denied for user 'root'` | MySQL 密码错 | 换成你自己的密码 |
+| `error:0308010C` | Node 17+ | 见第 0 步的警告 |
+| `'mvn' 不是内部或外部命令` | 没装 Maven | 装 Maven 3.6+ 并加到 PATH |
+| 登录提示「账号或密码错误」 | 库里有旧数据，演示账号没被创建 | 用库里已有的账号，或清空 `member` 表后重启 |
+| 前端页面空白 / 一直转圈 | 后端没起或端口不一致 | 先确认 `loginweb/test` 返回 `success` |
 
 ---
 
