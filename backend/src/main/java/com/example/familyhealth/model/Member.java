@@ -1,5 +1,7 @@
 package com.example.familyhealth.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Date;
 
 /**
@@ -89,6 +91,11 @@ public class Member {
         this.account = account;
     }
 
+    /**
+     * 密码字段永远不序列化给前端：为 null 时整个字段不出现，
+     * 这样「密码与哈希不出现在任何接口响应中」才是真的。
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getPassword() {
         return password;
     }

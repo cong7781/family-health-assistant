@@ -181,6 +181,9 @@ npm run serve
 | POST | `/aichat/chat` | AI 对话，body：`{"messages":[{"role":"user","content":"..."}]}` |
 | GET | `/aichat/health` | AI 服务状态（是否已配置 Key） |
 
+> 单条记录的查 / 改 / 删，如果 id 不存在、或者存在但不属于当前登录用户，统一返回 **404**——
+> 刻意不区分这两种情况，避免用响应差异探测某条记录是否存在。
+
 分页接口统一返回：
 
 ```json

@@ -37,11 +37,13 @@ public class RecordService {
         recordMapper.recordSaveRecord(record);
     }
 
-    public void recordUpdateRecord(Record record, Integer loginMemberId) {
-        recordMapper.recordUpdateRecord(record, loginMemberId);
+    /** @return 受影响行数 */
+    public int recordUpdateRecord(Record record, Integer loginMemberId) {
+        return recordMapper.recordUpdateRecord(record, loginMemberId);
     }
 
-    public void recordDeleteById(Integer id, Integer loginMemberId) {
-        recordMapper.recordDeleteById(id, loginMemberId);
+    /** @return 受影响行数 */
+    public int recordDeleteById(Integer id, Integer loginMemberId) {
+        return recordMapper.recordDeleteById(id, loginMemberId);
     }
 }

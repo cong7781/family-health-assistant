@@ -21,7 +21,9 @@ public interface RecordMapper {
 
     void recordSaveRecord(Record record);
 
-    void recordUpdateRecord(@Param("r") Record record, @Param("loginMemberId") Integer loginMemberId);
+    /** @return 受影响行数；为 0 说明 id 不存在或不属于当前用户 */
+    int recordUpdateRecord(@Param("r") Record record, @Param("loginMemberId") Integer loginMemberId);
 
-    void recordDeleteById(@Param("id") Integer id, @Param("loginMemberId") Integer loginMemberId);
+    /** @return 受影响行数；为 0 说明 id 不存在或不属于当前用户 */
+    int recordDeleteById(@Param("id") Integer id, @Param("loginMemberId") Integer loginMemberId);
 }
